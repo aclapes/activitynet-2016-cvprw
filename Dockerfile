@@ -1,4 +1,4 @@
-FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu14.04
+FROM nvidia/cuda:7.0-cudnn4-devel-ubuntu14.04
 MAINTAINER aclapes
 
 RUN echo "deb http://us.archive.ubuntu.com/ubuntu trusty main multiverse" >> /etc/apt/sources.list \
@@ -65,7 +65,8 @@ RUN useradd -ms /bin/bash dockeruser && \
         echo "AllowUsers dockeruser" >> /etc/ssh/sshd_config
 
 # Make user's source and copy code into it
-RUN mkdir dockeruser:dockeruser /home/dockeruser/src                                                    
+RUN mkdir dockeruser:dockeruser /home/dockeruser/src \
+        && chown dockeruser:dockeruser /home/dockeruser/src
 COPY . /home/dockeruser/src
 
 # Open port 22 to map with some host's port
