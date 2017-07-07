@@ -1,5 +1,5 @@
 import numpy as np
-
+import imageio
 
 def video_to_array(video_path,
                    resize=None,
@@ -37,15 +37,16 @@ def video_to_array(video_path,
     if dim_ordering not in ('th', 'tf'):
         raise Exception('Invalid dim_ordering')
 
-    cap = cv2.VideoCapture(video_path)
-    if not cap.isOpened():
-        raise Exception('Could not open the video')
-
-    num_frames = int(cap.get(CAP_PROP_FRAME_COUNT))
+    #cap = cv2.VideoCapture(video_path)
+    #if not cap.isOpened():
+    #    raise Exception('Could not open the video')
+    cap = imageio.get_reader(video_path)
+    #num_frames = int(cap.get(CAP_PROP_FRAME_COUNT))
+    num_frames = cap.get_meta_data()['nframes']
     if start_frame >= num_frames or start_frame < 0:
         raise Exception('Invalid initial frame given')
     # Set up the initial frame to start reading
-    cap.set(CAP_PROP_POS_FRAMES, start_frame)
+    #cap.set(CAP_PROP_POS_FRAMES, start_frame)
     # Set up until which frame to read
     if end_frame:
         end_frame = end_frame if end_frame < num_frames else num_frames
@@ -58,14 +59,24 @@ def video_to_array(video_path,
         raise Exception('Invalid ending position')
 
     frames = []
-    for i in range(start_frame, end_frame):
-        ret, frame = cap.read()
-        if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
-            return None
-
-        if resize:
+    #for i in range(start_frame, end_frame):
+    frame = None
+    for i in range(num_frames):
+	if i < start_frame or i >= end_frame:
+	    continue
+        try:
+            frame = cap.get_next_data()
+            if resize:
+                frame = cv2.resize(frame, (resize[1], resize[0]))
+        except:
+            pass
+	#ret, frame = cap.read()
+        #if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
+        #    return None
+	
+        #if resize:
             # The resize of CV2 requires pass firts width and then height
-            frame = cv2.resize(frame, (resize[1], resize[0]))
+            #frame = cv2.resize(frame, (resize[1], resize[0]))
         frames.append(frame)
 
     video = np.array(frames, dtype=np.float32)

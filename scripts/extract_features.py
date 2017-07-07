@@ -14,7 +14,7 @@ import h5py
 from src.data import VideoGenerator
 
 
-def extract_features(videos_dir, output_dir, batch_size, num_threads,
+def extract_features(videos_dir, video_format, output_dir, batch_size, num_threads,
                      queue_size, num_gpus):
     # Defining variables
     input_size = (112, 112)
@@ -28,7 +28,7 @@ def extract_features(videos_dir, output_dir, batch_size, num_threads,
     extracted_videos = output_file.keys()
     output_file.close()
 
-    videos_ids = [v[:-4] for v in os.listdir(videos_dir) if v[-4:] == '.mp4']
+    videos_ids = [v[:-4] for v in os.listdir(videos_dir) if v[-4:] == '.{0}'.format(video_format)]
 
     # Lets remove from the list videos_ids, the ones already extracted its features
     videos_ids_to_extract = list(set(videos_ids) - set(extracted_videos))
@@ -48,7 +48,7 @@ def extract_features(videos_dir, output_dir, batch_size, num_threads,
     def data_generator_task(index):
         generator = VideoGenerator(
             videos_ids_to_extract[index:nb_videos:num_threads], videos_dir,
-            'mp4', length, input_size)
+            video_format, length, input_size)
         keep = True
         while keep:
             try:
@@ -321,6 +321,15 @@ if __name__ == '__main__':
         default='data/videos',
         help='videos directory (default: %(default)s)')
     parser.add_argument(
+        '-f',
+        '--format',
+        type=str,
+        dest='format',
+        default='mp4',
+        help=
+        'set the video format'
+    )
+    parser.add_argument(
         '-o',
         '--output-dir',
         type=str,
@@ -363,5 +372,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    extract_features(args.directory, args.output, args.batch_size,
+    extract_features(args.directory, args.format, args.output, args.batch_size,
                      args.num_threads, args.queue_size, args.num_gpus)
