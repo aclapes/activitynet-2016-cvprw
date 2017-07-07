@@ -46,3 +46,5 @@ config.py
 .isort.cfg
 
 venv
+
+.idea/
