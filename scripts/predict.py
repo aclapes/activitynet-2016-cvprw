@@ -43,7 +43,7 @@ def extract_predicted_outputs(experiment_id,
         lstms_inputs.append(lstm)
     output_dropout = Dropout(p=0.5)(lstms_inputs[-1])
     output = TimeDistributed(
-        Dense(201, activation='softmax'), name='fc')(output_dropout)
+        Dense(48, activation='softmax'), name='fc')(output_dropout)
 
     model = Model(input=input_features, output=output)
     model.load_weights(weights_path)
@@ -69,12 +69,12 @@ def extract_predicted_outputs(experiment_id,
         output_subset = h5_predict.create_group(subset)
         for video_id in videos:
             progbar.update(count)
-            video_features = h5_dataset[video_id][...]
+            video_features = h5_dataset[video_id][...]  # [...] is equivalent to ".value"
             nb_instances = video_features.shape[0]
             video_features = video_features.reshape(nb_instances, 1, 4096)
             model.reset_states()
             Y = model.predict(video_features, batch_size=1)
-            Y = Y.reshape(nb_instances, 201)
+            Y = Y.reshape(nb_instances, 48)
 
             output_subset.create_dataset(video_id, data=Y)
             count += 1

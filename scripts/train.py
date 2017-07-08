@@ -43,7 +43,7 @@ def train(experiment_id, input_dataset, num_cells, num_layers,
 
     output_dropout = Dropout(p=dropout_probability)(lstms_inputs[-1])
     output = TimeDistributed(
-        Dense(201, activation='softmax'), name='fc')(output_dropout)
+        Dense(48, activation='softmax'), name='fc')(output_dropout)
 
     model = Model(input=input_features, output=output)
     model.summary()

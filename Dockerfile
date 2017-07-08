@@ -1,4 +1,4 @@
-FROM nvidia/cuda:7.0-cudnn4-devel-ubuntu14.04
+FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu14.04
 MAINTAINER aclapes
 
 RUN echo "deb http://us.archive.ubuntu.com/ubuntu trusty main multiverse" >> /etc/apt/sources.list \
@@ -73,6 +73,5 @@ COPY . /home/dockeruser/src
 EXPOSE 22
 RUN mkdir /var/run/sshd
 
-CMD sh -c 'ln -s /dev/null /dev/raw1394' \
-	&& /usr/sbin/sshd \
-	&& bash
+RUN sh -c 'ln -s /dev/null /dev/raw1394'
+CMD /usr/sbin/sshd && bash

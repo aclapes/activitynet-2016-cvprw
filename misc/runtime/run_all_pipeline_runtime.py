@@ -30,7 +30,7 @@ def run_runtime_tests(input_video, model_features, c3d_mean, model_localization)
     activity_threshold = .2
 
     # Load labels
-    with open('dataset/labels.txt', 'r') as f:
+    with open('dataset/labels.txt.bak', 'r') as f:
         labels = import_labels(f)
 
     print('')

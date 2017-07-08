@@ -15,7 +15,7 @@ def run_all_pipeline(input_video, smoothing_k, activity_threshold):
     length = 16
 
     # Load labels
-    with open('dataset/labels.txt', 'r') as f:
+    with open('dataset/labels.txt.bak', 'r') as f:
         labels = import_labels(f)
 
     print('Reading Video...')

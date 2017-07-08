@@ -9,7 +9,7 @@ from progressbar import ProgressBar
 
 import h5py
 from src.data import import_labels
-from src.processing import activity_localization, get_classification, smoothing
+from src.processing import activity_localization, get_classification, smoothing, get_label_sequence_from_info
 
 
 def process_prediction(experiment_id,
@@ -40,10 +40,10 @@ def process_prediction(experiment_id,
         subset_predictions = f_predictions[subset]
 
         progbar = ProgressBar(max_value=len(subset_predictions.keys()))
-        with open('dataset/templates/results_{}.json'.format(subset),
-                  'r') as f:
-            results_classification = json.load(f)
-        results_detection = copy.deepcopy(results_classification)
+        # with open('dataset/templates/results_{}.json'.format(subset),
+        #           'r') as f:
+        #     results_classification = json.load(f)
+        # results_detection = copy.deepcopy(results_classification)
 
         count = 0
         progbar.update(0)
@@ -51,51 +51,53 @@ def process_prediction(experiment_id,
             prediction = subset_predictions[video_id][...]
             video_info = videos_info[video_id]
             fps = float(video_info['num_frames']) / video_info['duration']
-            nb_clips = prediction.shape[0]
+
+            # Post processing to obtain frame-level classification
+            get_label_sequence_from_info(video_info, labels)
 
             # Post processing to obtain the classification
-            labels_idx, scores = get_classification(prediction, k=5)
-            result_classification = []
-            for idx, score in zip(labels_idx, scores):
-                label = labels[idx]
-                if score > 0:
-                    result_classification.append({
-                        'score': score,
-                        'label': label
-                    })
-            results_classification['results'][video_id] = result_classification
+            # labels_idx, scores = get_classification(prediction, k=5)
+            # result_classification = []
+            # for idx, score in zip(labels_idx, scores):
+            #     label = labels[idx]
+            #     if score > 0:
+            #         result_classification.append({
+            #             'score': score,
+            #             'label': label
+            #         })
+            # results_classification['results'][video_id] = result_classification
 
             # Post Processing to obtain the detection
-            prediction_smoothed = smoothing(prediction, k=smoothing_k)
-            activities_idx, startings, endings, scores = activity_localization(
-                prediction_smoothed, activity_threshold)
-            result_detection = []
-            for idx, s, e, score in zip(activities_idx, startings, endings,
-                                        scores):
-                label = labels[idx]
-                result_detection.append({
-                    'score':
-                    score,
-                    'segment': [s * clip_length / fps, e * clip_length / fps],
-                    'label':
-                    label
-                })
-            results_detection['results'][video_id] = result_detection
+            # prediction_smoothed = smoothing(prediction, k=smoothing_k)
+            # activities_idx, startings, endings, scores = activity_localization(
+            #     prediction_smoothed, activity_threshold)
+            # result_detection = []
+            # for idx, s, e, score in zip(activities_idx, startings, endings,
+            #                             scores):
+            #     label = labels[idx]
+            #     result_detection.append({
+            #         'score':
+            #         score,
+            #         'segment': [s * clip_length / fps, e * clip_length / fps],
+            #         'label':
+            #         label
+            #     })
+            # results_detection['results'][video_id] = result_detection
 
             count += 1
             progbar.update(count)
         progbar.finish()
 
-        classification_output_file = os.path.join(
-            output_path, 'results_classification_{}_{}.json'.format(
-                experiment_id, subset))
-        detection_output_file = os.path.join(
-            output_path, 'results_detection_{}_{}.json'.format(
-                experiment_id, subset))
-        with open(classification_output_file, 'w') as f:
-            json.dump(results_classification, f)
-        with open(detection_output_file, 'w') as f:
-            json.dump(results_detection, f)
+        # classification_output_file = os.path.join(
+        #     output_path, 'results_classification_{}_{}.json'.format(
+        #         experiment_id, subset))
+        # detection_output_file = os.path.join(
+        #     output_path, 'results_detection_{}_{}.json'.format(
+        #         experiment_id, subset))
+        # with open(classification_output_file, 'w') as f:
+        #     json.dump(results_classification, f)
+        # with open(detection_output_file, 'w') as f:
+        #     json.dump(results_detection, f)
 
     f_predictions.close()
 

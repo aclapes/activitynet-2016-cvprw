@@ -18,11 +18,6 @@ def create_stateful_dataset(video_features_file,
                             timesteps,
                             subset=None):
     features_size = 4096
-    output_size = 201
-
-    f_video_features = h5py.File(video_features_file, 'r')
-    output_file = os.path.join(output_path, 'dataset_stateful.hdf5')
-    f_dataset = h5py.File(output_file, 'w')
 
     if not subset:
         subsets = ['training', 'validation']
@@ -31,6 +26,12 @@ def create_stateful_dataset(video_features_file,
 
     with open(labels, 'r') as f:
         labels = import_labels(f)
+
+    output_size = len(labels)
+
+    f_video_features = h5py.File(video_features_file, 'r')
+    output_file = os.path.join(output_path, 'dataset_stateful.hdf5')
+    f_dataset = h5py.File(output_file, 'w')
 
     with open(videos_info, 'r') as f:
         videos_data = json.load(f)

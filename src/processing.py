@@ -10,6 +10,14 @@ def get_classification(sequence_class_prob, k=3):
     scores = class_prob[labels_index] / np.sum(class_prob[1:])
     return labels_index[:k], scores[:k]
 
+def get_label_sequence_from_info(info, labels):
+    label_seq = np.full((info['num_frames'],), dtype=np.int32, fill_value=0)
+    for annotation in info['annotations']:
+        seg_t = annotation['segment']
+        st  = seg_t[0] / info['duration'] * info['num_frames']
+        end = seg_t[1] / info['duration'] * info['num_frames']
+        label_seq[int(st):int(end)+1] = labels.index(annotation['label'])
+    return label_seq
 
 def smoothing(x, k=5):
     ''' Applies a mean filter to an input sequence. The k value specifies the window
