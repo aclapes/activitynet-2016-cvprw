@@ -64,10 +64,17 @@ RUN useradd -ms /bin/bash dockeruser && \
         usermod -a -G sudo dockeruser && \
         echo "AllowUsers dockeruser" >> /etc/ssh/sshd_config
 
+ARG HOME=/home/dockeruser/
 # Make user's source and copy code into it
-RUN mkdir dockeruser:dockeruser /home/dockeruser/src \
-        && chown dockeruser:dockeruser /home/dockeruser/src
-COPY . /home/dockeruser/src
+#RUN mkdir ${HOME}/src \
+#        && chown -R dockeruser:dockeruser ${HOME}/src
+
+RUN echo 'export PYTHONPATH=/home/dockeruser/src:$PYTHONPATH' >> ${HOME}/.bashrc \
+        && echo 'export PATH=/usr/local/cuda-8.0/bin:$PATH' >> ${HOME}/.bashrc \
+        && echo 'export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:/usr/local/cuda-8.0/lib:$LD_LIBRARY_PATH' >> ${HOME}/.bashrc
+
+COPY . ${HOME}/src
+RUN chown -R dockeruser:dockeruser ${HOME}/src
 
 # Open port 22 to map with some host's port
 EXPOSE 22
